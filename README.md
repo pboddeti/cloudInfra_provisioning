@@ -38,17 +38,8 @@ Pipeline file:
 
 Behavior:
 
-- Pull Request to `main`: runs `fmt`, `validate`, `plan`, and comments plan + inputs on PR.
+- Pull Request to `main`: runs `fmt`, `validate`, `plan`, and comments plan on PR.
 - Push/Merge to `main`: runs `apply` to deploy to GCP.
-
-### Configure repository variables
-
-Add these in GitHub repository **Settings -> Secrets and variables -> Actions -> Variables**:
-
-- `GCP_PROJECT_ID`
-- `TF_BUCKET_NAME`
-- `TF_REGION` (example: `us-central1`)
-- `TF_FORCE_DESTROY` (`true` or `false`)
 
 ### Configure repository secrets
 
@@ -56,8 +47,18 @@ Add these in **Settings -> Secrets and variables -> Actions -> Secrets**:
 
 - `GCP_WORKLOAD_IDENTITY_PROVIDER`
 - `GCP_SERVICE_ACCOUNT`
+- `TFVARS_CONTENT` (full content of your tfvars file)
 
-These are used for OIDC auth via `google-github-actions/auth`.
+`TFVARS_CONTENT` example value:
+
+project_id    = "arctic-rite-403213"
+bucket_name   = "gcs-bucket-3-27-2026"
+region        = "us-central1"
+force_destroy = false
+
+The workflow writes this secret into `terraform.auto.tfvars` at runtime.
+
+OIDC secrets are used for auth via `google-github-actions/auth`.
 
 ### Enforce plan before merge
 

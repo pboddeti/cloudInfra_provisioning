@@ -29,11 +29,6 @@ jobs:
   plan:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
-    env:
-      TF_VAR_project_id: ${{ vars.GCP_PROJECT_ID }}
-      TF_VAR_bucket_name: ${{ vars.TF_BUCKET_NAME }}
-      TF_VAR_region: ${{ vars.TF_REGION }}
-      TF_VAR_force_destroy: ${{ vars.TF_FORCE_DESTROY }}
 
     steps:
       - name: Checkout
@@ -47,6 +42,12 @@ jobs:
         with:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Create tfvars from secret
+        run: |
+          cat > terraform.auto.tfvars <<'EOF'
+          ${{ secrets.TFVARS_CONTENT }}
+          EOF
 
       - name: Terraform Init
         run: terraform init
@@ -66,10 +67,7 @@ jobs:
             echo "## Terraform Plan Summary"
             echo ""
             echo "### Inputs used"
-            echo "- project_id: $TF_VAR_project_id"
-            echo "- bucket_name: $TF_VAR_bucket_name"
-            echo "- region: $TF_VAR_region"
-            echo "- force_destroy: $TF_VAR_force_destroy"
+            echo "- Loaded from GitHub secret: TFVARS_CONTENT"
             echo ""
             echo "### Plan output (first 200 lines)"
             echo '```'
@@ -93,11 +91,6 @@ jobs:
   apply:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    env:
-      TF_VAR_project_id: ${{ vars.GCP_PROJECT_ID }}
-      TF_VAR_bucket_name: ${{ vars.TF_BUCKET_NAME }}
-      TF_VAR_region: ${{ vars.TF_REGION }}
-      TF_VAR_force_destroy: ${{ vars.TF_FORCE_DESTROY }}
 
     steps:
       - name: Checkout
@@ -111,6 +104,12 @@ jobs:
         with:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Create tfvars from secret
+        run: |
+          cat > terraform.auto.tfvars <<'EOF'
+          ${{ secrets.TFVARS_CONTENT }}
+          EOF
 
       - name: Terraform Init
         run: terraform init
