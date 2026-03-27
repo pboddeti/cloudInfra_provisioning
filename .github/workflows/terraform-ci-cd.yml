@@ -42,6 +42,9 @@ jobs:
           workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
 
+      - name: Terraform Fmt
+        run: terraform fmt -check -recursive
+
       - name: Create tfvars from secret
         run: |
           cat > terraform.auto.tfvars << 'EOF'
@@ -51,9 +54,6 @@ jobs:
 
       - name: Terraform Init
         run: terraform init
-
-      - name: Terraform Fmt
-        run: terraform fmt -check -recursive -exclude="*.tfvars"
 
       - name: Terraform Validate
         run: terraform validate
