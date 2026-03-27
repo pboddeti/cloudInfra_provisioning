@@ -44,15 +44,16 @@ jobs:
 
       - name: Create tfvars from secret
         run: |
-          cat > terraform.auto.tfvars <<'EOF'
+          cat > terraform.auto.tfvars << 'EOF'
           ${{ secrets.TFVARS_CONTENT }}
           EOF
+          sed -i 's/^[[:space:]]*//' terraform.auto.tfvars
 
       - name: Terraform Init
         run: terraform init
 
       - name: Terraform Fmt
-        run: terraform fmt -check -recursive
+        run: terraform fmt -check -recursive -exclude="*.tfvars"
 
       - name: Terraform Validate
         run: terraform validate
@@ -99,9 +100,10 @@ jobs:
 
       - name: Create tfvars from secret
         run: |
-          cat > terraform.auto.tfvars <<'EOF'
+          cat > terraform.auto.tfvars << 'EOF'
           ${{ secrets.TFVARS_CONTENT }}
           EOF
+          sed -i 's/^[[:space:]]*//' terraform.auto.tfvars
 
       - name: Terraform Init
         run: terraform init
