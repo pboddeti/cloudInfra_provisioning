@@ -1,4 +1,4 @@
-bucket_name   = "gcs-bucket-3-27-2026"
+bucket_name   = "gcs-bucket-3-30-2026"
 bucket_region = "us-central1"
 force_destroy = false
 
