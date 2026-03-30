@@ -45,13 +45,6 @@ jobs:
       - name: Terraform Fmt
         run: terraform fmt -check -recursive
 
-      - name: Create tfvars from secret
-        run: |
-          cat > terraform.auto.tfvars << 'EOF'
-          ${{ secrets.TFVARS_CONTENT }}
-          EOF
-          sed -i 's/^[[:space:]]*//' terraform.auto.tfvars
-
       - name: Terraform Init
         run: terraform init
 
@@ -97,13 +90,6 @@ jobs:
         with:
           workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
-
-      - name: Create tfvars from secret
-        run: |
-          cat > terraform.auto.tfvars << 'EOF'
-          ${{ secrets.TFVARS_CONTENT }}
-          EOF
-          sed -i 's/^[[:space:]]*//' terraform.auto.tfvars
 
       - name: Terraform Init
         run: terraform init
