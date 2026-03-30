@@ -1,22 +1,21 @@
-resource "google_storage_bucket" "this" {
-  name          = var.bucket_name
-  project       = var.project_id
-  location      = upper(var.bucket_region)
+# Bucket is provisioned via git module source
+module "gcs_bucket_remote" {
+  source = "git::https://github.com/pboddeti/terraform_module_agent.git?ref=main"
+
+  project_id    = var.project_id
+  bucket_name   = var.bucket_name
+  region        = var.bucket_region
   force_destroy = var.force_destroy
-
-  uniform_bucket_level_access = true
-
-  labels = {
-    environment = var.environment
-  }
 }
 
+# Object upload is handled locally on top of the git module bucket
 resource "google_storage_bucket_object" "objects" {
   for_each = var.objects
 
-  bucket         = google_storage_bucket.this.name
+  bucket         = module.gcs_bucket_remote.bucket_name
   name           = each.key
   content        = each.value
   detect_md5hash = "different hash"
 }
+
 

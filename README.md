@@ -1,69 +1,105 @@
 # CloudInfra-Provision
 
-Basic Terraform caller project for creating a GCS bucket using the module at:
+Terraform project for provisioning Google Cloud resources using a modular pattern.
 
-- git::https://github.com/pboddeti/terraform_module_agent.git?ref=main
+Current implemented service:
+- GCS bucket + object uploads
 
-## Files
+## Project Structure
 
-- providers.tf: Terraform and Google provider config
-- main.tf: module invocation
-- variables.tf: input variables
-- outputs.tf: output values
-- terraform.tfvars.example: sample variable values
+- providers.tf: Terraform version, backend, and Google provider
+- variables.tf: Root input interface (global + service bridge variables)
+- main.tf: Root orchestration (calls service modules)
+- outputs.tf: Root outputs (global values)
+- inputs/global.tfvars: Global values
+- inputs/bucket.tfvars: Bucket-specific values
+- data/: Files to upload to the bucket (for example sample.txt)
+- modules/gcs_bucket/main.tf: GCS resources implementation
+- modules/gcs_bucket/variables.tf: GCS module inputs
+- modules/gcs_bucket/outputs.tf: GCS module outputs
 
-## Usage
+## Input and Execution Flow
 
-1. Create a tfvars file:
+1. Terraform reads values from:
+   - inputs/global.tfvars
+   - inputs/bucket.tfvars
+2. Root variables are declared in variables.tf.
+3. Root main.tf passes values into module "gcs_bucket".
+4. modules/gcs_bucket/main.tf creates:
+   - google_storage_bucket
+   - google_storage_bucket_object (for each object)
 
-   cp terraform.tfvars.example terraform.tfvars
+Note: tfvars files must contain literal values only (no function calls). File content resolution is done in code, not in tfvars.
 
-2. Update terraform.tfvars values.
+## Local Usage
 
-3. Authenticate to GCP (example):
+1. Authenticate to GCP:
 
    gcloud auth application-default login
 
-4. Provision:
+2. Initialize:
 
    terraform init
-   terraform plan
-   terraform apply
+
+3. Validate:
+
+   terraform validate
+
+4. Plan:
+
+   terraform plan -no-color \
+     -var-file=inputs/global.tfvars \
+     -var-file=inputs/bucket.tfvars \
+     -out=tfplan
+
+5. Apply:
+
+   terraform apply -no-color tfplan
+
+## Uploading Files to GCS
+
+1. Add files under data/ (example: data/sample.txt).
+2. Map object name to relative file path in inputs/bucket.tfvars:
+
+   objects = {
+     "sample.txt" = "data/sample.txt"
+   }
+
+3. Run plan/apply.
 
 ## CI/CD (GitHub Actions)
 
-Pipeline file:
+Workflow: .github/workflows/terraform-ci-cd.yml
 
-- .github/workflows/terraform-ci-cd.yml
+### Triggers
 
-Behavior:
+- Push to any branch when files change in:
+  - **/*.tf
+  - inputs/**/*.tfvars
+  - data/**
+  - .github/workflows/terraform-ci-cd.yml
 
-- Pull Request to `main`: runs `fmt`, `validate`, `plan`, and comments plan on PR.
-- Push/Merge to `main`: runs `apply` to deploy to GCP.
+### Jobs
 
-### Configure repository secrets
+- plan:
+  - fmt check
+  - init
+  - validate
+  - imports existing bucket into state (if present)
+  - plan with inputs/global.tfvars + inputs/bucket.tfvars
 
-Add these in **Settings -> Secrets and variables -> Actions -> Secrets**:
+- apply (main branch only):
+  - init
+  - imports existing bucket into state (if present)
+  - apply with inputs/global.tfvars + inputs/bucket.tfvars
 
-- `GCP_WORKLOAD_IDENTITY_PROVIDER`
-- `GCP_SERVICE_ACCOUNT`
-- `TFVARS_CONTENT` (full content of your tfvars file)
+## GitHub OIDC Configuration
 
-`TFVARS_CONTENT` example value:
+Set these in **Settings -> Secrets and variables -> Actions -> Variables**:
 
-project_id    = "arctic-rite-403213"
-bucket_name   = "gcs-bucket-3-27-2026"
-region        = "us-central1"
-force_destroy = false
+- GCP_WORKLOAD_IDENTITY_PROVIDER
+- GCP_SERVICE_ACCOUNT
 
-The workflow writes this secret into `terraform.auto.tfvars` at runtime.
+Authentication is handled by google-github-actions/auth using Workload Identity Federation (OIDC).
 
-OIDC secrets are used for auth via `google-github-actions/auth`.
 
-### Enforce plan before merge
-
-In branch protection for `main`, add required status check:
-
-- `plan`
-
-This ensures PR merge is blocked if Terraform plan/validation fails.
