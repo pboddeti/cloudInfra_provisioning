@@ -7,6 +7,7 @@ on:
     paths:
       - "**/*.tf"
       - "inputs/**/*.tfvars"
+      - "data/**"
       - ".github/workflows/terraform-ci-cd.yml"
 
 permissions:
@@ -48,6 +49,17 @@ jobs:
 
       - name: Terraform Init
         run: terraform init
+
+      - name: Import existing bucket into state (if already created)
+        run: |
+          BUCKET_NAME=$(awk -F'"' '/^bucket_name/{print $2}' inputs/bucket.tfvars)
+          if [ -n "$BUCKET_NAME" ]; then
+            terraform import \
+              -var-file=inputs/global.tfvars \
+              -var-file=inputs/bucket.tfvars \
+              module.gcs_bucket.google_storage_bucket.this "$BUCKET_NAME" \
+              || echo "Import skipped (bucket may not exist yet)."
+          fi
 
       - name: Terraform Validate
         run: terraform validate
@@ -98,6 +110,17 @@ jobs:
 
       - name: Terraform Init
         run: terraform init
+
+      - name: Import existing bucket into state (if already created)
+        run: |
+          BUCKET_NAME=$(awk -F'"' '/^bucket_name/{print $2}' inputs/bucket.tfvars)
+          if [ -n "$BUCKET_NAME" ]; then
+            terraform import \
+              -var-file=inputs/global.tfvars \
+              -var-file=inputs/bucket.tfvars \
+              module.gcs_bucket.google_storage_bucket.this "$BUCKET_NAME" \
+              || echo "Import skipped (bucket may not exist yet)."
+          fi
 
       - name: Terraform Apply
         run: terraform apply -var-file=inputs/global.tfvars -var-file=inputs/bucket.tfvars -auto-approve -no-color
