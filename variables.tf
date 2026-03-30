@@ -35,7 +35,7 @@ variable "force_destroy" {
 }
 
 variable "objects" {
-  description = "Objects to upload to bucket"
+  description = "Map of object name => relative file path from repo root (for example: data/sample.txt)"
   type        = map(string)
   default     = {}
 }

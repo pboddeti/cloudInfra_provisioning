@@ -10,5 +10,8 @@ module "gcs_bucket" {
   bucket_name   = var.bucket_name
   bucket_region = var.bucket_region
   force_destroy = var.force_destroy
-  objects       = var.objects
+  objects = {
+    for name, rel_path in var.objects :
+    name => file("${path.root}/${rel_path}")
+  }
 }
