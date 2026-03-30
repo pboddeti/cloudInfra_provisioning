@@ -14,9 +14,9 @@ resource "google_storage_bucket" "this" {
 resource "google_storage_bucket_object" "objects" {
   for_each = var.objects
 
-  bucket       = google_storage_bucket.this.name
-  name         = each.key
-  content      = each.value
+  bucket         = google_storage_bucket.this.name
+  name           = each.key
+  content        = each.value
   detect_md5hash = "different hash"
 }
 
