@@ -1,13 +1,22 @@
-module "gcs_bucket_remote" {
-  source = "git::https://github.com/pboddeti/terraform_module_agent.git?ref=main"
-
-  project_id    = var.project_id
-  bucket_name   = var.bucket_name
-  region        = var.bucket_region
+resource "google_storage_bucket" "this" {
+  name          = var.bucket_name
+  project       = var.project_id
+  location      = upper(var.bucket_region)
   force_destroy = var.force_destroy
-  objects       = var.objects
-  # Objects are uploaded from ${path.module}/../data/ folder
-  # Define them in inputs/bucket.tfvars using file() function
-  # Example: objects = { "file1.txt" = file("${path.module}/../../data/file1.txt") }
+
+  uniform_bucket_level_access = true
+
+  labels = {
+    environment = var.environment
+  }
+}
+
+resource "google_storage_bucket_object" "objects" {
+  for_each = var.objects
+
+  bucket       = google_storage_bucket.this.name
+  name         = each.key
+  content      = each.value
+  detect_md5hash = "different hash"
 }
 
