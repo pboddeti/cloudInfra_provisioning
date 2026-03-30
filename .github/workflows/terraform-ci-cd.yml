@@ -57,7 +57,7 @@ jobs:
             terraform import \
               -var-file=inputs/global.tfvars \
               -var-file=inputs/bucket.tfvars \
-              module.gcs_bucket.google_storage_bucket.this "$BUCKET_NAME" \
+              module.gcs_bucket.module.gcs_bucket_remote.google_storage_bucket.this "$BUCKET_NAME" \
               || echo "Import skipped (bucket may not exist yet)."
           fi
 
@@ -118,7 +118,7 @@ jobs:
             terraform import \
               -var-file=inputs/global.tfvars \
               -var-file=inputs/bucket.tfvars \
-              module.gcs_bucket.google_storage_bucket.this "$BUCKET_NAME" \
+              module.gcs_bucket.module.gcs_bucket_remote.google_storage_bucket.this "$BUCKET_NAME" \
               || echo "Import skipped (bucket may not exist yet)."
           fi
 
