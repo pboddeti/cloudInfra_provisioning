@@ -1,14 +1,17 @@
-output "bucket_name" {
-  description = "Created bucket name"
-  value       = module.bucket.bucket_name
+# Global outputs
+output "project_id" {
+  description = "GCP project ID"
+  value       = var.project_id
 }
 
-output "bucket_id" {
-  description = "Created bucket ID"
-  value       = module.bucket.bucket_id
+output "region" {
+  description = "Default GCP region"
+  value       = var.region
 }
 
-output "bucket_url" {
-  description = "Created bucket URL"
-  value       = module.bucket.bucket_url
+output "environment" {
+  description = "Environment name"
+  value       = var.environment
 }
+
+

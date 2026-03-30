@@ -1,22 +1,3 @@
-# Global variables shared across all services
-variable "project_id" {
-  description = "GCP project ID"
-  type        = string
-}
-
-variable "region" {
-  description = "Default GCP region"
-  type        = string
-  default     = "us-central1"
-}
-
-variable "environment" {
-  description = "Environment name"
-  type        = string
-  default     = "dev"
-}
-
-# GCS input variables (loaded at root from inputs/*.tfvars)
 variable "bucket_name" {
   description = "GCS bucket name"
   type        = string
@@ -39,4 +20,3 @@ variable "objects" {
   type        = map(string)
   default     = {}
 }
-

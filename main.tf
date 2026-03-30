@@ -1,8 +1,14 @@
-module "bucket" {
-  source = "git::https://github.com/pboddeti/terraform_module_agent.git?ref=main"
+module "gcs_bucket" {
+  source = "./modules/gcs_bucket"
 
-  project_id    = var.project_id
+  # Global variables
+  project_id  = var.project_id
+  region      = var.region
+  environment = var.environment
+
+  # GCS inputs
   bucket_name   = var.bucket_name
-  region        = var.region
+  bucket_region = var.bucket_region
   force_destroy = var.force_destroy
+  objects       = var.objects
 }

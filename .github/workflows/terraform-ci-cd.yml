@@ -6,6 +6,7 @@ on:
       - "**"
     paths:
       - "**/*.tf"
+      - "inputs/**/*.tfvars"
       - ".github/workflows/terraform-ci-cd.yml"
 
 permissions:
@@ -52,15 +53,19 @@ jobs:
         run: terraform validate
 
       - name: Terraform Plan
-        run: terraform plan -no-color -var-file=terraform.tfvars -out=tfplan
+        run: terraform plan -no-color -var-file=inputs/global.tfvars -var-file=inputs/bucket.tfvars -out=tfplan
 
       - name: Build plan summary
         run: |
           {
             echo "## Terraform Plan Summary"
             echo ""
-            echo "### Inputs used"
-            echo "- Loaded from GitHub secret: TFVARS_CONTENT"
+            echo "### Project Structure"
+            echo "- Root: global variables (project_id, region, environment)"
+            echo "- modules/gcs_bucket/: GCS service (variables.tf, main.tf, outputs.tf)"
+            echo "- inputs/global.tfvars: global values"
+            echo "- inputs/bucket.tfvars: bucket-specific values"
+            echo "- Flow: inputs -> root variables/main -> modules/gcs_bucket/main.tf"
             echo ""
             echo "### Plan output (first 200 lines)"
             echo '```'
@@ -95,4 +100,4 @@ jobs:
         run: terraform init
 
       - name: Terraform Apply
-        run: terraform apply -var-file=terraform.tfvars -auto-approve -no-color
+        run: terraform apply -var-file=inputs/global.tfvars -var-file=inputs/bucket.tfvars -auto-approve -no-color

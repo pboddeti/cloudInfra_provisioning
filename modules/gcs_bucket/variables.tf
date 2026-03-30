@@ -1,4 +1,4 @@
-# Global variables shared across all services
+# Global variables (passed from root)
 variable "project_id" {
   description = "GCP project ID"
   type        = string
@@ -16,7 +16,7 @@ variable "environment" {
   default     = "dev"
 }
 
-# GCS input variables (loaded at root from inputs/*.tfvars)
+# GCS bucket specific variables
 variable "bucket_name" {
   description = "GCS bucket name"
   type        = string
@@ -39,4 +39,3 @@ variable "objects" {
   type        = map(string)
   default     = {}
 }
-
